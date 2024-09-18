@@ -10,7 +10,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // No credentialsId needed for public repositories
                 git url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
             }
         }
@@ -48,23 +47,21 @@ def deployPackagesToAEM(String aemUrl) {
     def modules = ['all', 'ui.apps', 'ui.content', 'ui.config']
     modules.each { module ->
         def packagePath = "${module}/target/"
-        def dir = new File(packagePath)
-        if (dir.exists()) {
-            dir.eachFile { file ->
-                if (file.name.endsWith('.zip')) {
-                    // Ensure paths are correctly quoted and escaped for Windows
-                    bat """
-                    curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} ^
-                        -F "file=@${file.absolutePath}" ^
-                        -F "name=${file.name}" ^
-                        -F "force=true" ^
-                        -F "install=true" ^
-                        ${aemUrl}/crx/packmgr/service.jsp
-                    """
-                }
+        // Use 'findFiles' to locate ZIP files in the packagePath
+        def zipFiles = findFiles(glob: "${packagePath}*.zip")
+        if (zipFiles.length > 0) {
+            zipFiles.each { file ->
+                bat """
+                curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} ^
+                    -F "file=@${file.path}" ^
+                    -F "name=${file.name}" ^
+                    -F "force=true" ^
+                    -F "install=true" ^
+                    ${aemUrl}/crx/packmgr/service.jsp
+                """
             }
         } else {
-            echo "No target directory found for module ${module}"
+            echo "No ZIP files found in ${packagePath}"
         }
     }
 }
