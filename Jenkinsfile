@@ -32,6 +32,51 @@ pipeline {
                 }
             }
         }
+        stage('Approval for Stage Deployment') {
+            steps {
+                input message: 'Deploy to Stage?', ok: 'Deploy'
+            }
+        }
+        stage('Deploy to Stage Author') {
+            steps {
+                script {
+                    deployPackagesToAEM('http://172.29.73.131:5502')
+                }
+            }
+        }
+        stage('Deploy to Stage Publish') {
+            steps {
+                script {
+                    deployPackagesToAEM('http://172.29.73.131:5503')
+                }
+            }
+        }
+        stage('Approval for Production Deployment') {
+            steps {
+                input message: 'Deploy to Production?', ok: 'Deploy'
+            }
+        }
+        stage('Deploy to Prod Author') {
+            steps {
+                script {
+                    deployPackagesToAEM('http://172.29.73.131:6502')
+                }
+            }
+        }
+        stage('Deploy to Prod Preview') {
+            steps {
+                script {
+                    deployPackagesToAEM('http://172.29.73.131:6503')
+                }
+            }
+        }
+         stage('Deploy to Prod Publish') {
+            steps {
+                script {
+                    deployPackagesToAEM('http://172.29.73.131:6504')
+                }
+            }
+        }
     }
     post {
         success {
@@ -47,7 +92,6 @@ def deployPackagesToAEM(String aemUrl) {
     def modules = ['all', 'ui.apps', 'ui.content', 'ui.config']
     modules.each { module ->
         def packagePath = "${module}/target/"
-        // Use 'findFiles' to locate ZIP files in the packagePath
         def zipFiles = findFiles(glob: "${packagePath}*.zip")
         if (zipFiles.length > 0) {
             zipFiles.each { file ->
