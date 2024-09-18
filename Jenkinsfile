@@ -1,15 +1,16 @@
 pipeline {
     agent any
     tools {
-        jdk 'JAVA' // Ensure this matches the configured JDK in Jenkins tools
-        maven 'Maven' // Ensure this matches the configured Maven in Jenkins tools
+        jdk 'JDK'  // Ensure this matches your Jenkins configuration
+        maven 'Maven'  // Ensure this matches your Jenkins configuration
     }
     environment {
-        AEM_CREDENTIALS = credentials('aem-credentials') // Stores the credential ID securely
+        AEM_CREDENTIALS = credentials('aem-credentials')
     }
     stages {
         stage('Checkout') {
             steps {
+                // No credentialsId needed for public repositories
                 git url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
             }
         }
@@ -52,7 +53,7 @@ def deployPackagesToAEM(String aemUrl) {
             dir.eachFile { file ->
                 if (file.name.endsWith('.zip')) {
                     sh """
-                        curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true ${aemUrl}/crx/packmgr/service.jsp
+                        curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true https://172.29.73.131/crx/packmgr/service.jsp
                     """
                 }
             }
