@@ -47,7 +47,7 @@ pipeline {
 def deployPackagesToAEM(String aemUrl) {
     def modules = ['all', 'ui.apps', 'ui.content', 'ui.config']
     modules.each { module ->
-        def packagePath = "${module}${File.separator}target${File.separator}"
+        def packagePath = "${module}/target/"
         def dir = new File(packagePath)
         if (dir.exists()) {
             dir.eachFile { file ->
