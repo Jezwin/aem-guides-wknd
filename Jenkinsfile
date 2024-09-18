@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'git-credentials', url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
+                git url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
             }
         }
         stage('Build') {
