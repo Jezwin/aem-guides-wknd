@@ -16,7 +16,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                bat 'mvn clean install -PautoInstallPackage'
+                bat 'mvn clean install'
             }
         }
         stage('Deploy to Dev Author') {
