@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
+                git credentialsId: 'git-credentials', url: 'https://github.com/Jezwin/aem-guides-wknd.git', branch: 'main'
             }
         }
         stage('Build') {
@@ -22,14 +22,14 @@ pipeline {
         stage('Deploy to Dev Author') {
             steps {
                 script {
-                    deployToAEM('http://localhost:4502', 'admin', 'admin')
+                    deployPackagesToAEM('http://localhost:4502')
                 }
             }
         }
         stage('Deploy to Dev Publish') {
             steps {
                 script {
-                    deployToAEM('http://localhost:4503', 'admin', 'admin')
+                    deployPackagesToAEM('http://localhost:4503')
                 }
             }
         }
@@ -44,8 +44,21 @@ pipeline {
     }
 }
 
-def deployToAEM(String aemUrl, String username, String password) {
-    sh """
-        curl -u ${username}:${password} -F file=@target/your-package.zip -F name=your-package -F force=true -F install=true ${aemUrl}/crx/packmgr/service.jsp
-    """
+def deployPackagesToAEM(String aemUrl) {
+    def modules = ['all', 'ui.apps', 'ui.content', 'ui.config']
+    modules.each { module ->
+        def packagePath = "${module}/target/"
+        def dir = new File(packagePath)
+        if (dir.exists()) {
+            dir.eachFile { file ->
+                if (file.name.endsWith('.zip')) {
+                    sh """
+                        curl -u ${AEM_USER}:${AEM_PASSWORD} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true http://172.29.73.131/crx/packmgr/service.jsp
+                    """
+                }
+            }
+        } else {
+            echo "No target directory found for module ${module}"
+        }
+    }
 }
