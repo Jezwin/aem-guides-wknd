@@ -1,12 +1,11 @@
 pipeline {
     agent any
     tools {
-        jdk 'JDK11'
-        maven 'Maven3'
+        jdk 'JAVA' // Ensure this matches the configured JDK in Jenkins tools
+        maven 'Maven' // Ensure this matches the configured Maven in Jenkins tools
     }
     environment {
-        AEM_USER = credentials('aem-credentials').username
-        AEM_PASSWORD = credentials('aem-credentials').password
+        AEM_CREDENTIALS = credentials('aem-credentials') // Stores the credential ID securely
     }
     stages {
         stage('Checkout') {
@@ -53,7 +52,7 @@ def deployPackagesToAEM(String aemUrl) {
             dir.eachFile { file ->
                 if (file.name.endsWith('.zip')) {
                     sh """
-                        curl -u ${AEM_USER}:${AEM_PASSWORD} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true http://172.29.73.131/crx/packmgr/service.jsp
+                        curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true ${aemUrl}/crx/packmgr/service.jsp
                     """
                 }
             }
