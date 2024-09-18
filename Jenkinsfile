@@ -16,20 +16,20 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn clean install -PautoInstallPackage'
+                bat 'mvn clean install -PautoInstallPackage'
             }
         }
         stage('Deploy to Dev Author') {
             steps {
                 script {
-                    deployPackagesToAEM('http://localhost:4502')
+                    deployPackagesToAEM('http://172.29.73.131:4502')
                 }
             }
         }
         stage('Deploy to Dev Publish') {
             steps {
                 script {
-                    deployPackagesToAEM('http://localhost:4503')
+                    deployPackagesToAEM('http://172.29.73.131:4503')
                 }
             }
         }
@@ -47,13 +47,19 @@ pipeline {
 def deployPackagesToAEM(String aemUrl) {
     def modules = ['all', 'ui.apps', 'ui.content', 'ui.config']
     modules.each { module ->
-        def packagePath = "${module}/target/"
+        def packagePath = "${module}${File.separator}target${File.separator}"
         def dir = new File(packagePath)
         if (dir.exists()) {
             dir.eachFile { file ->
                 if (file.name.endsWith('.zip')) {
-                    sh """
-                        curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} -F file=@${file.absolutePath} -F name=${file.name} -F force=true -F install=true https://172.29.73.131/crx/packmgr/service.jsp
+                    // Ensure paths are correctly quoted and escaped for Windows
+                    bat """
+                    curl -u ${AEM_CREDENTIALS_USR}:${AEM_CREDENTIALS_PSW} ^
+                        -F "file=@${file.absolutePath}" ^
+                        -F "name=${file.name}" ^
+                        -F "force=true" ^
+                        -F "install=true" ^
+                        ${aemUrl}/crx/packmgr/service.jsp
                     """
                 }
             }
