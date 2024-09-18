@@ -53,7 +53,7 @@ pipeline {
         }
         stage('Approval for Production Deployment') {
             steps {
-                input message: 'Deploy to Production?', ok: 'Deploy'
+                input message: 'Deploy to PROD Author and Preview?', ok: 'Deploy'
             }
         }
         stage('Deploy to Prod Author') {
@@ -70,7 +70,12 @@ pipeline {
                 }
             }
         }
-         stage('Deploy to Prod Publish') {
+        stage('Approval for Live Deployment') {
+            steps {
+                input message: 'Deploy to PROD Publish?', ok: 'Deploy'
+            }
+        }
+        stage('Deploy to Prod Publish') {
             steps {
                 script {
                     deployPackagesToAEM('http://172.29.73.131:6504')
