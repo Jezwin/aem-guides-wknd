@@ -115,6 +115,10 @@ Import-Package: javax.annotation;version=0.0.0,*
             <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
             <exclusions>
                 <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-imaging</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>org.apache.sling.models.impl</artifactId>
                 </exclusion>
